@@ -8,21 +8,29 @@ var Call = require('call');
 var Hoek = require('hoek');
 var Joi = require('joi');
 
-var _route = Joi.object({
+var Handler = Joi.alternatives([Joi.func(), Joi.object({
+  statusCode: Joi.number().positive().integer().min(200).default(200),
+  headers: Joi.object(),
+  payload: Joi.required()
+}), Joi.object({
+  isBoom: true
+}).unknown()]);
+
+var _route = Joi.alternatives([Joi.object({
   method: Joi.string().regex(/^[a-zA-Z0-9!#\$%&'\*\+\-\.^_`\|~]+$/).lowercase().default('get'),
   path: Joi.string().required(),
-  handler: Joi.alternatives([Joi.func(), Joi.object({
-    statusCode: Joi.number().positive().integer().min(200).default(200),
-    headers: Joi.object(),
-    payload: Joi.required()
-  }), Joi.object({
-    isBoom: true
-  }).unknown()]).required(),
-  validate: Joi.object().unknown().optional(),
-  tags: Joi.array().items(Joi.string()).optional(),
+  handler: Handler,
   vhost: Joi.array().items(Joi.string().hostname()).min(1).single().default(['*']),
   filter: Joi.func().optional()
-});
+}), Joi.object({
+  method: Joi.string().regex(/^[a-zA-Z0-9!#\$%&'\*\+\-\.^_`\|~]+$/).lowercase().default('get'),
+  path: Joi.string().required(),
+  config: Joi.object({
+    handler: Handler
+  }).unknown(),
+  vhost: Joi.array().items(Joi.string().hostname()).min(1).single().default(['*']),
+  filter: Joi.func().optional()
+})]);
 
 var simplifyPath = function simplifyPath(str) {
   return str.replace(/{[^}]+}/gi, function () {
@@ -68,7 +76,8 @@ var Malkoha = function () {
         var settings = Joi.attempt(Hoek.clone(config), _route);
         var cfg = _this.getRoute(settings);
         if (cfg) {
-          cfg.handler = settings.handler;
+          cfg.handler = settings.handler || false;
+          cfg.config = settings.config;
           cfg.tags = settings.tags;
           cfg.filter = settings.filter;
           cfg.validate = settings.validate;
@@ -115,7 +124,7 @@ var onRequest = function onRequest(req, reply) {
     return reply.continue();
   }
 
-  var handler = match.route.handler;
+  var handler = match.route.handler || (match.route.config || {}).handler;
   if (!handler) {
     return reply.continue();
   }
