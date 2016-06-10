@@ -1,6 +1,6 @@
 {
   "name": "malkoha",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Dynamic routes for Hapi.js with support for add, update, and delete of routes",
   "main": "dist/index.js",
   "scripts": {
