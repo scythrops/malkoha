@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+test.sh
+npm-debug.log
+web/site/
+data/
+configs/token.key
+notes/
+bu/
