@@ -2,7 +2,7 @@
   "name": "malkoha",
   "version": "0.0.1",
   "description": "Dynamic routes for Hapi.js with support for add, update, and delete of routes",
-  "main": "build/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "lab --transform ./test/setup.js --ignore 'Reflect,core,_babelPolyfill,regeneratorRuntime,__core-js_shared__'",
     "compile": "babel lib --out-dir dist --source-maps",

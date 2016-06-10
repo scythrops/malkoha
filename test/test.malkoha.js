@@ -114,6 +114,84 @@ describe('Malkoha', ()=>{
     });
   });
 
+  it('Should be able to update a config route', (done)=>{
+    const server = new Hapi.Server();
+    server.connection();
+    server.register(Malkoha, (err)=>{
+      expect(err).to.not.exist();
+
+      server.malkoha.route({
+        path: '/',
+        method: 'get',
+        handler(req, reply){
+          return reply(1);
+        }
+      });
+
+      server.inject('/', (res)=>{
+        expect(res.statusCode).to.equal(200);
+        expect(res.result).to.equal(1);
+
+        server.malkoha.route({
+          path: '/',
+          method: 'get',
+          config: {
+            tags: ['test'],
+            handler(req, reply){
+              return reply(2);
+            }
+          }
+        });
+
+        server.inject('/', (res)=>{
+          expect(res.statusCode).to.equal(200);
+          expect(res.result).to.equal(2);
+          done();
+        });
+      });
+    });
+  });
+
+  it('Should be able to update a route with a config', (done)=>{
+    const server = new Hapi.Server();
+    server.connection();
+    server.register(Malkoha, (err)=>{
+      expect(err).to.not.exist();
+
+      server.malkoha.route({
+        path: '/',
+        method: 'get',
+        config: {
+          handler(req, reply){
+            return reply(1);
+          }
+        }
+      });
+
+      server.inject('/', (res)=>{
+        expect(res.statusCode).to.equal(200);
+        expect(res.result).to.equal(1);
+
+        server.malkoha.route({
+          path: '/',
+          method: 'get',
+          config: {
+            tags: ['test'],
+            handler(req, reply){
+              return reply(2);
+            }
+          }
+        });
+
+        server.inject('/', (res)=>{
+          expect(res.statusCode).to.equal(200);
+          expect(res.result).to.equal(2);
+          done();
+        });
+      });
+    });
+  });
+
   it('Should be able to delete a route override', (done)=>{
     const server = new Hapi.Server();
     server.connection();
